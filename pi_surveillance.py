@@ -29,13 +29,25 @@ client = None
 
 # check to see if the Dropbox should be used
 if conf["use_dropbox"]:
-	# connect to dropbox and start the session authorization process
-	flow = DropboxOAuth2FlowNoRedirect(conf["dropbox_key"], conf["dropbox_secret"])
-	print("[INFO] Authorize this application: {}".format(flow.start()))
-	authCode = raw_input("Enter auth code here: ").strip()
 
-	# finish the authorization and grab the Dropbox client
-	(accessToken, userID) = flow.finish(authCode)
+	if conf["dropbox_access_token"] == "":
+		# connect to dropbox and start the session authorization process
+		flow = DropboxOAuth2FlowNoRedirect(conf["dropbox_key"], conf["dropbox_secret"])
+		print("[INFO] Authorize this application: {}".format(flow.start()))
+		authCode = raw_input("Enter auth code here: ").strip()
+
+		# finish the authorization and grab the Dropbox client
+		(accessToken, userID) = flow.finish(authCode)
+
+		# Display the access token so it can be stored for later use.
+		# @todo: have the program write this out somewhere so it doesn't have to be done manually.
+		print("################")
+		print("Your access token is {}. set this value in conf.json so you don't have to reauthenticate \
+			each time the program is run".format(accessToken))
+		print("################")
+	else:
+		accessToken = conf["dropbox_access_token"]
+
 	client = DropboxClient(accessToken)
 	print("[SUCCESS] dropbox account linked")
 
