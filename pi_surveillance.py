@@ -34,7 +34,7 @@ if conf["use_dropbox"]:
 		# connect to dropbox and start the session authorization process
 		flow = DropboxOAuth2FlowNoRedirect(conf["dropbox_key"], conf["dropbox_secret"])
 		print("[INFO] Authorize this application: {}".format(flow.start()))
-		authCode = raw_input("Enter auth code here: ").strip()
+		authCode = input("Enter auth code here: ").strip()
 
 		# finish the authorization and grab the Dropbox client
 		(accessToken, userID) = flow.finish(authCode)
@@ -100,7 +100,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 	# As of the 3.2 version of OpenCV, findCountours returns three
 	# values but we only care about the middle one.
 	# See http://www.pyimagesearch.com/2015/06/01/home-surveillance-and-motion-detection-with-the-raspberry-pi-python-and-opencv/#comment-364523
-	cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 	cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 
 	# loop over the contours
