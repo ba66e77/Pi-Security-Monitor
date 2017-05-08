@@ -14,7 +14,7 @@ import imutils
 import json
 import time
 import cv2
-
+import logging
 
 
 def get_dropbox_client(access_token=""):
@@ -38,14 +38,15 @@ def get_dropbox_client(access_token=""):
 
         # Display the access token so it can be stored for later use.
         # @todo: have the program write this out somewhere so it doesn't have to be done manually.
-        print("################")
-        print("Your access token is {}. set this value in conf.json so you don't have to reauthenticate \
+        logging.info("################")
+        logging.info("Your access token is {}. set this value in conf.json so you don't have to reauthenticate \
     			each time the program is run".format(access_token))
-        print("################")
+        logging.info("################")
     else:
         access_token = conf["dropbox_access_token"]
 
     client = DropboxClient(access_token)
+    logging.info("Dropbox client connected.")
     return client
 
 
@@ -72,7 +73,7 @@ rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
 
 # allow the camera to warmup, then initialize the average frame, last
 # uploaded timestamp, and frame motion counter
-print("[INFO] warming up...")
+logging.info("[INFO] warming up...")
 time.sleep(conf["camera_warmup_time"])
 avg = None
 lastUploaded = datetime.datetime.now()
@@ -93,7 +94,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
 
     # if the average frame is None, initialize it
     if avg is None:
-        print("[INFO] starting background model...")
+        logging.info("[INFO] starting background model...")
         avg = gray.copy().astype("float")
         rawCapture.truncate(0)
         continue
@@ -152,7 +153,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
                     cv2.imwrite(t.path, frame)
 
                     # upload the image to Dropbox and cleanup the tempory image
-                    print("[UPLOAD] {}".format(ts))
+                    logging.info("[UPLOAD] {}".format(ts))
                     path = "{base_path}/{timestamp}.jpg".format(
                         base_path=conf["dropbox_base_path"], timestamp=ts)
                     client.put_file(path, open(t.path, "rb"))
