@@ -15,7 +15,7 @@ import json
 import time
 import cv2
 import logging
-
+import sys
 
 def get_dropbox_client(access_token=""):
     """
@@ -50,6 +50,8 @@ def get_dropbox_client(access_token=""):
     return client
 
 if __name__ == "__main__":
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
     # construct the argument parser and parse the arguments
     ap = argparse.ArgumentParser()
     ap.add_argument("-c", "--conf", required=True,
