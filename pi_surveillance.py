@@ -3,8 +3,8 @@
 
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
-from dropbox.client import DropboxOAuth2FlowNoRedirect
-from dropbox.client import DropboxClient
+from dropbox.oauth import DropboxOAuth2FlowNoRedirect
+from dropbox import Dropbox
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import argparse
@@ -24,7 +24,7 @@ def get_dropbox_client(access_token=""):
     client using the returned access_token.
     
     :param access_token: string
-    :return: DropboxClient
+    :return: Dropbox
     """
 
     if access_token == "":
@@ -34,7 +34,7 @@ def get_dropbox_client(access_token=""):
         authCode = input("Enter auth code here: ").strip()
 
         # finish the authorization and grab the Dropbox client
-        (access_token, userID) = flow.finish(authCode)
+        access_token = flow.finish(authCode).access_token
 
         # Display the access token so it can be stored for later use.
         # @todo: have the program write this out somewhere so it doesn't have to be done manually.
@@ -42,10 +42,8 @@ def get_dropbox_client(access_token=""):
         logging.info("Your access token is {}. set this value in conf.json so you don't have to reauthenticate \
     			each time the program is run".format(access_token))
         logging.info("################")
-    else:
-        access_token = conf["dropbox_access_token"]
 
-    client = DropboxClient(access_token)
+    client = Dropbox(access_token)
     logging.info("Dropbox client connected.")
     return client
 
@@ -66,6 +64,7 @@ if __name__ == "__main__":
         # check to see if the Dropbox should be used
         client = None
         if conf["use_dropbox"]:
+            logging.info("[INFO] Using Dropbox")
             client = get_dropbox_client(conf["dropbox_access_token"])
 
         # initialize the camera and grab a reference to the raw camera capture
@@ -157,9 +156,9 @@ if __name__ == "__main__":
 
                             # upload the image to Dropbox and cleanup the tempory image
                             logging.info("[UPLOAD] {}".format(ts))
-                            path = "{base_path}/{timestamp}.jpg".format(
+                            path = "/{base_path}/{timestamp}.jpg".format(
                                 base_path=conf["dropbox_base_path"], timestamp=ts)
-                            client.put_file(path, open(t.path, "rb"))
+                            client.files_upload(open(t.path, "rb").read(), path)
                             t.cleanup()
 
                         # update the last uploaded timestamp and reset the motion
